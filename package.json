@@ -1,0 +1,24 @@
+{
+  "name": "sk-chart",
+  "version": "1.0.0",
+  "description": "sk-chart-description-here",
+  "main": "src/index.html",
+  "scripts": {
+    "test": "test-command-here"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://mik-man@bitbucket.org/mik-man/sk-chart.git"
+  },
+  "keywords": [
+    "d3",
+    "chart",
+    "graph"
+  ],
+  "author": "mikola.manuylenko",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/mik-man/sk-chart#readme",
+  "dependencies": {
+    "d3": "^5.16.0"
+  }
+}
