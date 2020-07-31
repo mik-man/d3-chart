@@ -1,8 +1,50 @@
 <html>
-    <head>
 
-    </head>
-    <body>
-        chart will be here
-    </body>
+<head>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="chart.js"></script>
+  <script src="bindData.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+    }
+
+    input {
+      text-align: right;
+      width: 5rem;
+    }
+  </style>
+</head>
+
+<body onload="initChart()">
+  <table id="tableData">
+    <tr>
+      <td>Limit:</td>
+      <td><input type="number" value="3" id="input_limit" />%</td>
+      <td><input type="button" onclick="refreshChart()" value="refresh   "
+        style="margin-right: .8rem;" /></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>Z1</td>
+      <td>Z2</td>
+      <td>Cross</td>
+    </tr>
+    <tr>
+      <td>x:</td>
+      <td><input type="number" id="z1x" /></td>
+      <td><input type="number" id="z2x" /></td>
+      <td><input type="number" id="cx" /></td>
+    </tr>
+    <tr>
+      <td>y:</td>
+      <td><input type="number" id="z1y" /></td>
+      <td><input type="number" id="z2y" /></td>
+      <td><input type="number" id="cy" /></td>
+    </tr>
+  </table>
+  <br />
+  <svg id="chart" width="500" height="400"></svg>
+</body>
+
 </html>
