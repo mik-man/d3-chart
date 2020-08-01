@@ -1,8 +1,10 @@
 var store = {
+	pointsCount: 2,
 	data: [{ x: 0, y: 2 }, { x: 1, y: 2.01 }],
 	cross: { x: 0, y: 0 },
 	limit: [],
 	vline: [],
+	constant: 1,
 };
 
 function initChart() {
@@ -11,15 +13,13 @@ function initChart() {
 
 function refreshChart() {
 	getTableData();
-	let { data, cross } = store;
+	let { data, cross, constant } = store;
 	let limitPercent = document.getElementById('input_limit').value;
 	cross.y = data[0].y + (data[0].y * limitPercent / 100);
 	cross.x = calcCrossX(cross.y, data);
-	store.data[2] = cross;
-	let littleMore = { x: 0, y: 0 };
-	littleMore.x = data[0].x + ((cross.x - data[0].x) * 1.1);
-	littleMore.y = data[0].y + ((cross.y - data[0].y) * 1.1);
-	store.data[3] = littleMore;
+	store.data.push(cross);
+	let littleMore = calcLittleMore();
+	store.data.push(littleMore);
 	store.limit = [{ x: data[0].x, y: cross.y }, { x: littleMore.x, y: cross.y }];
 	store.vline = [{ x: cross.x, y: data[0].y }, { x: cross.x, y: littleMore.y }];
 	setTableData();
@@ -48,7 +48,8 @@ function drawChart() {
 
 	var line = d3.line()
 		.x(function (d) { return x(d.x) })
-		.y(function (d) { return y(d.y) });
+		.y(function (d) { return y(d.y) })
+		.curve(d3.curveMonotoneX);
 
 	// line
 	g.append("path")
@@ -59,8 +60,7 @@ function drawChart() {
 		.attr("d", line);
 
 	data.pop();
-	svg.selectAll("circles")
-		.append("circles")
+	g.selectAll("circles")
 		.data(data)
 		.enter()
 		.append("circle")
@@ -83,11 +83,46 @@ function drawChart() {
 }
 
 function calcCrossX(y, data) {
+	console.log('points count =', store.pointsCount);
+	if (store.pointsCount < 3) {
+		return calcCrossX2points(y, data);
+	}
+	return calcCrossX3points(y, data);
+}
+
+function calcCrossX2points(y, data) {
 	const dx = data[1].x - data[0].x;
 	let dy = data[1].y - data[0].y;
 	if (dy === 0) { dy = 1; }
 	const dy1 = y - data[0].y;
-	const dx1 = dy1 * (dx / dy);
+	const dx1 = dy1 * (dx / dy) / store.constant;
 	const x = data[0].x + dx1;
 	return (Math.round(x * 1000) / 1000);
+}
+
+function calcCrossX3points(y, data) {
+	let tg0 = tg(data[0], data[1]);
+	let tg1 = tg(data[1], data[2]);
+	let tg2 = tg1 + ((tg0 + tg1)/2);
+	console.log('tg0', tg0, 'tg1', tg1, 'tg2', tg2);
+	const dy = y - data[2].y;
+	const dx = dy / tg2 / store.constant;
+	const x = data[2].x + dx;
+	return (Math.round(x * 1000) / 1000);
+}
+
+function calcLittleMore() {
+	const { data } = store;
+	const lm = { x: 0, y: 0 };
+	const ic = store.pointsCount; // index cross point
+	lm.y = data[0].y + ((data[ic].y - data[0].y) * 1.1);
+	const tgLast = tg(data[ic-1], data[ic]);
+	const dy = lm.y - data[ic].y;
+	const dx = dy / tgLast / store.constant;
+	lm.x = data[ic].x + dx;
+	return lm;
+}
+
+function tg(p0, p1) {
+	return (p1.y - p0.y) / (p1.x - p0.x);
 }
