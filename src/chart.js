@@ -83,31 +83,13 @@ function drawChart() {
 }
 
 function calcCrossX(y, data) {
-	console.log('points count =', store.pointsCount);
-	if (store.pointsCount < 3) {
-		return calcCrossX2points(y, data);
-	}
-	return calcCrossX3points(y, data);
-}
-
-function calcCrossX2points(y, data) {
-	const dx = data[1].x - data[0].x;
-	let dy = data[1].y - data[0].y;
-	if (dy === 0) { dy = 1; }
-	const dy1 = y - data[0].y;
-	const dx1 = dy1 * (dx / dy) / store.constant;
-	const x = data[0].x + dx1;
-	return (Math.round(x * 1000) / 1000);
-}
-
-function calcCrossX3points(y, data) {
-	let tg0 = tg(data[0], data[1]);
-	let tg1 = tg(data[1], data[2]);
-	let tg2 = tg1 + ((tg0 + tg1)/2);
-	console.log('tg0', tg0, 'tg1', tg1, 'tg2', tg2);
-	const dy = y - data[2].y;
-	const dx = dy / tg2 / store.constant;
-	const x = data[2].x + dx;
+	const iLast = store.pointsCount - 1;
+	const avgInc = avgIncTg(data);
+	const tgLast = tg(data[iLast-1], data[iLast])
+	const tgCross = tgLast + avgInc;
+	const dy = y - data[iLast].y;
+	const dx = dy / tgCross / store.constant;
+	const x = data[iLast].x + dx;
 	return (Math.round(x * 1000) / 1000);
 }
 
@@ -124,5 +106,23 @@ function calcLittleMore() {
 }
 
 function tg(p0, p1) {
-	return (p1.y - p0.y) / (p1.x - p0.x);
+	const dx = p1.x - p0.x;
+	if (dx === 0) { return 1; } //error, actually
+	return (p1.y - p0.y) / dx;
+}
+
+// average increment of tg (i.e. corner)
+function avgIncTg(data) {
+	// (increment needs at least two pair (0,1) and (1,2))
+	// so, e.g.: two points = one corner = no increments
+	// three points = two corners = one increment... and so on.
+	const incCount = store.pointsCount - 2;
+	if (incCount === 0) { return 0; }
+	let incTotal = 0;
+	for (let i=0; i < incCount; i++) {
+		const tgPrev = tg(data[i], data[i+1]);
+		const tgNext = tg(data[i+1], data[i+2]);
+		incTotal += (tgNext - tgPrev);
+	}
+	return (incTotal / incCount);
 }
