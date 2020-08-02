@@ -5,6 +5,7 @@ var store = {
 	limit: [],
 	vline: [],
 	constant: 1,
+	limitPercent: 3,
 };
 
 function initChart() {
@@ -13,9 +14,8 @@ function initChart() {
 
 function refreshChart() {
 	getTableData();
-	let { data, cross, constant } = store;
-	let limitPercent = document.getElementById('input_limit').value;
-	cross.y = data[0].y + (data[0].y * limitPercent / 100);
+	let { data, cross, limitPercent } = store;
+	cross.y = data[0].y * (100 + limitPercent) / 100;
 	cross.x = calcCrossX(cross.y, data);
 	store.data.push(cross);
 	let littleMore = calcLittleMore();
@@ -35,7 +35,7 @@ function drawChart() {
 		height = +svg.attr("height") - margin.top - margin.bottom,
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	let x = d3.scaleLinear().rangeRound([0, width]);
+	let x = d3.scaleLinear().rangeRound([0, width - 50]);
 	let y = d3.scaleLinear().rangeRound([height, 0]);
 	x.domain([data[0].x, limit[1].x]);
 	y.domain([data[0].y, vline[1].y]);
@@ -51,7 +51,26 @@ function drawChart() {
 		.y(function (d) { return y(d.y) })
 		.curve(d3.curveMonotoneX);
 
-	// line
+	// it works! :)
+	g.append("text").attr("x", 160).attr("y", 20)
+		.text(`limit (${store.limit[0].y})`)
+		.attr("font-size", ".8rem");
+
+	// limit
+	g.append("path")
+		.datum(limit)
+		.attr("fill", "none")
+		.attr("stroke", "black")
+		.attr("d", line);
+
+	// vline
+	g.append("path")
+		.datum(vline)
+		.attr("fill", "none")
+		.attr("stroke", "black")
+		.attr("d", line);
+
+	// chart line
 	g.append("path")
 		.datum(data)
 		.attr("fill", "none")
@@ -59,8 +78,10 @@ function drawChart() {
 		.style("stroke-dasharray", ("3, 3"))
 		.attr("d", line);
 
-	data.pop();
-	g.selectAll("circles")
+	data.length = store.pointsCount + 1;
+
+	// points
+	g.selectAll()
 		.data(data)
 		.enter()
 		.append("circle")
@@ -68,61 +89,55 @@ function drawChart() {
 		.attr("cx", function (d) { return x(d.x) })
 		.attr("cy", function (d) { return y(d.y) })
 		.attr("r", 3);
-	// limit
-	g.append("path")
-		.datum(limit)
-		.attr("fill", "none")
-		.attr("stroke", "black")
-		.attr("d", line);
-	// vline
-	g.append("path")
-		.datum(vline)
-		.attr("fill", "none")
-		.attr("stroke", "black")
-		.attr("d", line);
-}
+		//.on("click", mouseClick)
+		//.on("mouseout", removeHint);
+	// points sings
+	g.selectAll()
+		.data(data)
+		.enter()
+		.append("text")
+		.attr("x", function (d, i) { return x(d.x) + shiftX(i) })
+		.attr("y", function (d, i) { return y(d.y) + shiftY(d, i) })
+		.text(getSign) // points hints
+		.attr("font-size", ".8rem");
 
-function calcCrossX(y, data) {
-	const iLast = store.pointsCount - 1;
-	const avgInc = avgIncTg(data);
-	const tgLast = tg(data[iLast-1], data[iLast])
-	const tgCross = tgLast + avgInc;
-	const dy = y - data[iLast].y;
-	const dx = dy / tgCross / store.constant;
-	const x = data[iLast].x + dx;
-	return (Math.round(x * 1000) / 1000);
-}
-
-function calcLittleMore() {
-	const { data } = store;
-	const lm = { x: 0, y: 0 };
-	const ic = store.pointsCount; // index cross point
-	lm.y = data[0].y + ((data[ic].y - data[0].y) * 1.1);
-	const tgLast = tg(data[ic-1], data[ic]);
-	const dy = lm.y - data[ic].y;
-	const dx = dy / tgLast / store.constant;
-	lm.x = data[ic].x + dx;
-	return lm;
-}
-
-function tg(p0, p1) {
-	const dx = p1.x - p0.x;
-	if (dx === 0) { return 1; } //error, actually
-	return (p1.y - p0.y) / dx;
-}
-
-// average increment of tg (i.e. corner)
-function avgIncTg(data) {
-	// (increment needs at least two pair (0,1) and (1,2))
-	// so, e.g.: two points = one corner = no increments
-	// three points = two corners = one increment... and so on.
-	const incCount = store.pointsCount - 2;
-	if (incCount === 0) { return 0; }
-	let incTotal = 0;
-	for (let i=0; i < incCount; i++) {
-		const tgPrev = tg(data[i], data[i+1]);
-		const tgNext = tg(data[i+1], data[i+2]);
-		incTotal += (tgNext - tgPrev);
+	function removeHint() {
+		d3.select("#hint").remove();
 	}
-	return (incTotal / incCount);
+
+	function mouseClick(d, i) {  // Add interactivity
+		d3.select("#hint").remove();
+		// Specify where to put label of text
+		g.append("text")
+			.attr("id", "hint")  // Create an id for text so we can select it later for removing on mouseout
+			.attr("x", function () { return x(d.x) + shiftX(i); })
+			.attr("y", function () { return y(d.y) + shiftY(d, i); })
+			.text(() => getSign(d, i));
+	}
+}
+
+function getSign(point, i) {
+	switch (i) {
+		case store.pointsCount:
+			return (`X(${point.x},${point.y})`);
+		default:
+			return (`Z${i + 1}(${point.x}, ${point.y})`);
+	}
+}
+
+function shiftX(i) {
+	return 7;
+}
+
+function shiftY(point, i) {
+	switch (i) {
+		case 0:
+			return -10;
+		case store.pointsCount:
+			return 18;
+	}
+	if (point.y !== store.data[0].y) {
+		return 5;
+	}
+	return -10;
 }

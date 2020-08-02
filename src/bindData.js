@@ -21,6 +21,7 @@ function displayPoints() {
 }
 
 function getTableData() {
+	store.limitPercent = getLimitPercentValue();
 	store.data[0].x = +document.getElementById("z1x").value;
 	store.data[0].y = +document.getElementById("z1y").value;
 	store.data[1].x = +document.getElementById("z2x").value;
@@ -56,9 +57,9 @@ function z2yValue(z2y) {
 		document.getElementById("z2y").value = z1y;
 		return z1y
 	}
-	let maxZ2y = z1y * 1.03;
+	let maxZ2y = z1y * (100 + store.limitPercent) / 100;
 	if (z2y > maxZ2y) {
-		alert('z2.y should be less than z1.y + 3%');
+		alert(`z2.y should be less than z1.y + ${store.limitPercent}%`);
 		document.getElementById("z2y").value = maxZ2y;
 		return maxZ2y;
 	}
@@ -73,11 +74,21 @@ function z3yValue(z3y) {
 		document.getElementById("z3y").value = newZ3y;
 		return newZ3y;
 	}
-	let maxZ3y = store.data[0].y * 1.03;
+	let maxZ3y = store.data[0].y * (100 + store.limitPercent) / 100;
 	if (z3y > maxZ3y) {
-		alert('z3.y should be less than z1.y + 3%');
+		alert(`z3.y should be less than z1.y + ${store.limitPercent}%`);
 		document.getElementById("z3y").value = maxZ2y;
 		return maxZ2y;
 	}
 	return z3y;
+}
+
+function getLimitPercentValue() {
+	let limPer = +document.getElementById('input_limit').value;
+	if (limPer >= 3 && limPer <= 100) {
+		return limPer;
+	}
+	alert(`Limit should be from 3 to 100%`);
+	document.getElementById("input_limit").value = 3;
+	return 3;
 }
