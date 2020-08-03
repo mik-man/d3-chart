@@ -1,10 +1,12 @@
 var store = {
 	pointsCount: 3,
-	data: [{ x: 95, y: 736 }, { x: 300, y: 739 }, { x: 550, y: 741}],
+	data: [{ x: 95, y: 736 }, { x: 300, y: 739 }, { x: 550, y: 741 }],
+	angles: [45],
 	cross: { x: 0, y: 0 },
+	crossAngle: 45,
 	limit: [],
 	vline: [],
-	constant: 1,
+	constant: 1.2,
 	limitPercent: 3,
 };
 
@@ -14,14 +16,8 @@ function initChart() {
 
 function refreshChart() {
 	getTableData();
-	let { data, cross, limitPercent } = store;
-	cross.y = data[0].y * (100 + limitPercent) / 100;
-	cross.x = calcCrossX(cross.y, data);
-	store.data.push(cross);
-	let littleMore = calcLittleMore();
-	store.data.push(littleMore);
-	store.limit = [{ x: data[0].x, y: cross.y }, { x: littleMore.x, y: cross.y }];
-	store.vline = [{ x: cross.x, y: data[0].y }, { x: cross.x, y: littleMore.y }];
+	checkData();
+	calcData();
 	setTableData();
 	d3.select("svg").selectAll("*").remove();
 	drawChart();
@@ -56,6 +52,7 @@ function drawChart() {
 		.text(`limit (${store.limit[0].y})`)
 		.attr("font-size", ".8rem");
 
+	console.log(store);
 	// limit
 	g.append("path")
 		.datum(limit)
@@ -91,6 +88,7 @@ function drawChart() {
 		.attr("r", 3);
 		//.on("click", mouseClick)
 		//.on("mouseout", removeHint);
+	
 	// points sings
 	g.selectAll()
 		.data(data)
