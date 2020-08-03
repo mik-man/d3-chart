@@ -3,7 +3,9 @@ function calcCrossX(y, data) {
 	const avgInc = avgIncTg(data);
 	const tgLast = tg(data[iLast-1], data[iLast])
 	let tgCross = tgLast + avgInc;
-	if (tgCross < 0.0001) { tgCross = .1 };
+	const cornerX = Math.atan(tgCross)/Math.PI*180;
+	console.log(`cornerX = ${cornerX};`);
+	if (tgCross < 0.0000001) { tgCross = .1 };
 	const dy = y - data[iLast].y;
 	const dx = dy / tgCross / store.constant;
 	const x = data[iLast].x + dx;
@@ -33,13 +35,18 @@ function avgIncTg(data) {
 	// (increment needs at least two pair (0,1) and (1,2))
 	// so, e.g.: two points = one corner = no increments
 	// three points = two corners = one increment... and so on.
-	const incCount = store.pointsCount - 2;
+	const cornersCount = store.pointsCount - 1;
+	const incCount = cornersCount - 1;
 	if (incCount === 0) { return 0; }
 	let incTotal = 0;
 	for (let i=0; i < incCount; i++) {
 		const tgPrev = tg(data[i], data[i+1]);
 		const tgNext = tg(data[i+1], data[i+2]);
 		incTotal += (tgNext - tgPrev);
+		const corner1 = Math.atan(tgPrev)/Math.PI*180;
+		const corner2 = Math.atan(tgNext)/Math.PI*180;
+		const cornerInc = Math.atan(incTotal)/Math.PI*180 /2;
+		console.log(`corner1 = ${corner1}; corner2 = ${corner2}; avgInc = ${cornerInc};`);
 	}
-	return (incTotal / incCount);
+	return (incTotal / cornersCount);
 }
