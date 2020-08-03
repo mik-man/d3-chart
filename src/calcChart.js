@@ -1,45 +1,82 @@
-function calcCrossX(y, data) {
-	const iLast = store.pointsCount - 1;
-	const avgInc = avgIncTg(data);
-	const tgLast = tg(data[iLast-1], data[iLast])
-	let tgCross = tgLast + avgInc;
-	if (tgCross < 0.0001) { tgCross = .1 };
-	const dy = y - data[iLast].y;
-	const dx = dy / tgCross / store.constant;
-	const x = data[iLast].x + dx;
+function calcData() {
+	let { data, cross, limitPercent } = store;
+	cross.y = data[0].y * (100 + limitPercent) / 100;
+	cross.x = calcCrossX(cross.y);
+	data.push(cross);
+	let littleMore = calcLittleMore();
+	data.push(littleMore);
+	recalcAngles();
+	store.limit = [{ x: data[0].x, y: cross.y }, { x: littleMore.x, y: cross.y }];
+	store.vline = [{ x: cross.x, y: data[0].y }, { x: cross.x, y: littleMore.y }];
+}
+
+function calcCrossX(y) {
+	const { data } = store;
+	store.crossAngle = avgAngle() * store.constant;
+	const dy = y - data[0].y;
+	const dx = dy / getTga(store.crossAngle);
+	let x = data[0].x + dx;
+	// use constant, but no more than last z-point
+	if (x < data[store.pointsCount - 1].x) { x = data[store.pointsCount - 1].x; }
 	return (Math.round(x * 1000) / 1000);
 }
 
 function calcLittleMore() {
-	const { data } = store;
-	const lm = { x: 0, y: 0 };
-	const ic = store.pointsCount; // index cross point
-	lm.y = data[0].y + ((data[ic].y - data[0].y) * 1.1);
-	const tgLast = tg(data[ic-1], data[ic]);
-	const dy = lm.y - data[ic].y;
-	const dx = dy / tgLast / store.constant;
-	lm.x = data[ic].x + dx;
-	return lm;
-}
-
-function tg(p0, p1) {
-	const dx = p1.x - p0.x;
-	if (dx === 0) { return 1; } //error, actually
-	return (p1.y - p0.y) / dx;
-}
-
-// average increment of tg (i.e. corner)
-function avgIncTg(data) {
-	// (increment needs at least two pair (0,1) and (1,2))
-	// so, e.g.: two points = one corner = no increments
-	// three points = two corners = one increment... and so on.
-	const incCount = store.pointsCount - 2;
-	if (incCount === 0) { return 0; }
-	let incTotal = 0;
-	for (let i=0; i < incCount; i++) {
-		const tgPrev = tg(data[i], data[i+1]);
-		const tgNext = tg(data[i+1], data[i+2]);
-		incTotal += (tgNext - tgPrev);
+	const { data, cross } = store;
+	const dy = (cross.y - data[0].y) * .1; // little more cross.y
+	const tgLast = getTg(data[store.pointsCount - 1], cross);
+	if (tgLast > 0) {
+		const dx = dy / tgLast;
+		return { x: cross.x + dx, y: cross.y + dy };
 	}
-	return (incTotal / incCount);
+	return { x: cross.x, y: cross.y + dy };
+}
+
+// average agnle
+function avgAngle() {
+	const { data } = store;
+	let anglesCount = store.pointsCount - 1;
+	if (anglesCount === 0) { anglesCount = 1; }
+	let anglesTotal = 0;
+	for (let i = 0; i < anglesCount; i++) {
+		anglesTotal += calcAngle(data[i], data[i + 1]);
+	}
+	console.log('anglesTotal = ', anglesTotal, 'anglesCount = ', anglesCount);
+	return (anglesTotal / anglesCount);
+}
+
+function consoleLogDataAngles(rem) {
+	if (rem) console.log(rem);
+	store.angles.forEach((a, i) => {
+		console.log(`angle[${i}-${i + 1}] = ${a}`);
+	});
+	console.log('cross = ', store.cross);
+	console.log(`angle[0-X] = ${store.crossAngle}`);
+	console.log('data = ', store.data);
+}
+
+// all points (posible with Cross and LittleMore)
+function recalcAngles() {
+	const { data } = store;
+	for (let i = 0; i < data.length - 1; i++) {
+		store.angles[i] = calcAngle(data[i], data[i + 1]);
+	}
+	store.crossAngle = calcAngle(data[0], store.cross);
+	consoleLogDataAngles();
+}
+
+function calcAngle(p0, p1) {
+	return (Math.atan(getTg(p0, p1)) / Math.PI * 180);
+}
+
+function getTg(p0, p1) {
+	const dx = p1.x - p0.x;
+	if (dx === 0) { return 0; } // error, actually
+	return ((p1.y - p0.y) / dx);
+}
+
+function getTga(degree) {
+	const tg =  Math.tan(degree / 180 * Math.PI);
+	if (tg === 0) { return 0.00001; }
+	return tg;
 }
