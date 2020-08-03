@@ -1,6 +1,6 @@
 var store = {
-	pointsCount: 2,
-	data: [{ x: 0, y: 2 }, { x: 1, y: 2.01 }],
+	pointsCount: 3,
+	data: [{ x: 95, y: 736 }, { x: 300, y: 739 }, { x: 550, y: 741}],
 	cross: { x: 0, y: 0 },
 	limit: [],
 	vline: [],
