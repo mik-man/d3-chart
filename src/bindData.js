@@ -86,7 +86,7 @@ function z3yValue(z3y) {
 
 function getLimitPercentValue() {
 	let limPer = +document.getElementById('input_limit').value;
-	if (limPer >= 3 && limPer <= 1000) {
+	if (limPer >= 3 && limPer <= 100) {
 		return limPer;
 	}
 	alert(`Limit should be from 3 to 100%`);

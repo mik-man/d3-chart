@@ -11,13 +11,17 @@ function calcData() {
 }
 
 function calcCrossX(y) {
-	const { data } = store;
-	store.crossAngle = avgAngle() * store.constant;
-	const dy = y - data[0].y;
-	const dx = dy / getTga(store.crossAngle);
-	let x = data[0].x + dx;
+	const { data, pointsCount } = store;
+	const iLast = pointsCount - 1;
+	const tgLast = getTg(data[iLast - 1], data[iLast]);
+	if (tgLast <= 0) {
+		return data[iLast].x * 1.01;
+	}
+	const dy = y - data[iLast].y;
+	const dx = dy / tgLast;
+	let x = (data[iLast].x + dx) / store.constant;
 	// use constant, but no more than last z-point
-	if (x < data[store.pointsCount - 1].x) { x = data[store.pointsCount - 1].x; }
+	if (x < data[iLast].x) { x = data[iLast].x * 1.01; }
 	return (Math.round(x * 1000) / 1000);
 }
 
@@ -87,7 +91,7 @@ function recalcAngles() {
 		store.angles[i] = calcAngle(data[i], data[i + 1]);
 	}
 	store.crossAngle = calcAngle(data[0], store.cross);
-	// consoleLogDataAngles();
+	consoleLogDataAngles();
 }
 
 function calcAngle(p0, p1) {
