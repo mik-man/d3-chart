@@ -6,8 +6,8 @@ function calcData() {
 	let littleMore = calcLittleMore();
 	data.push(littleMore);
 	recalcAngles();
-	store.limit = [{ x: data[0].x, y: cross.y }, { x: littleMore.x, y: cross.y }];
-	store.vline = [{ x: cross.x, y: data[0].y }, { x: cross.x, y: littleMore.y }];
+	calcLimitLines(littleMore);
+	calcPointLines();
 }
 
 function calcCrossX(y) {
@@ -30,6 +30,31 @@ function calcLittleMore() {
 		return { x: cross.x + dx, y: cross.y + dy };
 	}
 	return { x: cross.x, y: cross.y + dy };
+}
+
+function calcLimitLines(littleMore) {
+	const { data, cross } = store;
+	// to draw chart not from start of line
+	const margintLeft10percent = (littleMore.x - data[0].x) * 0.1;
+	const margintBottom10percent = (littleMore.y - data[0].y) * 0.1;
+	store.limit = [
+		{ x: data[0].x - margintLeft10percent, y: cross.y },
+		{ x: littleMore.x, y: cross.y }];
+	store.vline = [
+		{ x: cross.x, y: data[0].y - margintBottom10percent },
+		{ x: cross.x, y: littleMore.y }];
+}
+
+function calcPointLines() {
+	for (let i = 0; i < store.pointsCount; i++) {
+		store.pointLines[i] = calcPointLine(i);
+	}
+}
+
+function calcPointLine(pi) {
+	const { data, limit, vline } = store;
+	const { x, y } = data[pi];
+	return ([{ x: limit[0].x, y }, data[pi], { x, y: vline[0].y }]);
 }
 
 // average agnle
@@ -62,7 +87,7 @@ function recalcAngles() {
 		store.angles[i] = calcAngle(data[i], data[i + 1]);
 	}
 	store.crossAngle = calcAngle(data[0], store.cross);
-	consoleLogDataAngles();
+	// consoleLogDataAngles();
 }
 
 function calcAngle(p0, p1) {
@@ -76,7 +101,7 @@ function getTg(p0, p1) {
 }
 
 function getTga(degree) {
-	const tg =  Math.tan(degree / 180 * Math.PI);
+	const tg = Math.tan(degree / 180 * Math.PI);
 	if (tg === 0) { return 0.00001; }
 	return tg;
 }
