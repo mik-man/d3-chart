@@ -2,7 +2,7 @@ var store = {
 	constant: 1.2,
 	limitPercent: 3,
 	pointsCount: 3,
-	data: [{ x: 95, y: 736 }, { x: 300, y: 739 }, { x: 550, y: 741 }],
+	data: [{ x: 95, y: 736 }, { x: 300, y: 738 }, { x: 550, y: 743 }],
 	dates: ['2020.08.01', '2020.08.02', '2020.08.03'],
 	angles: [45],
 	cross: { x: 0, y: 0 },
@@ -12,22 +12,43 @@ var store = {
 	pointLines: [] // 2 dimentions array
 };
 
+// example
+function callRenderChart() {
+	renderChart(
+		'chart',
+		[{ x: 95, y: 736 }, { x: 300, y: 738 }, { x: 550, y: 743 }],
+		['2020.07.01', '2020.07.02', '2020.07.03'],
+		5,
+		1.3,
+	);
+}
+
+function renderChart(rootEl, points, dates, limit, angleMultiplier) {
+	store.data = points;
+	store.dates = dates;
+	store.limitPercent = limit;
+	store.constant = angleMultiplier;
+	store.pointsCount = points.length;
+	checkData();
+	calcData();
+	drawChart(`#${rootEl}`);
+}
+
 function initChart() {
 	setTableData();
 }
 
 function refreshChart() {
 	getTableData();
-	checkData();
+	if (!checkData()) { setTableData(); }
 	calcData();
-	setTableData();
-	d3.select("svg").selectAll("*").remove();
-	drawChart();
+	drawChart("#chart");
 }
 
-function drawChart() {
+function drawChart(svgId) {
 	let { data, limit, vline, pointLines } = store;
-	var svg = d3.select("svg"),
+	d3.select(svgId).selectAll("*").remove();
+	var svg = d3.select(svgId),
 		margin = { top: 20, right: 20, bottom: 30, left: 50 },
 		width = +svg.attr("width") - margin.left - margin.right,
 		height = +svg.attr("height") - margin.top - margin.bottom,
@@ -93,8 +114,6 @@ function drawChart() {
 		.attr("cx", function (d) { return xScale(d.x) })
 		.attr("cy", function (d) { return yScale(d.y) })
 		.attr("r", 3);
-	//.on("click", mouseClick)
-	//.on("mouseout", removeHint);
 
 	// points sings
 	g.selectAll()
@@ -110,20 +129,6 @@ function drawChart() {
 	for (let pli = 0; pli < store.pointsCount; pli++) {
 		drawPointLine(g, pli, line);
 		drawPointLineSigns(g, pli, xScale, yScale);
-	}
-
-	function removeHint() {
-		d3.select("#hint").remove();
-	}
-
-	function mouseClick(d, i) {  // Add interactivity
-		d3.select("#hint").remove();
-		// Specify where to put label of text
-		g.append("text")
-			.attr("id", "hint")  // Create an id for text so we can select it later for removing on mouseout
-			.attr("x", function () { return xScale(d.x) + shiftX(i); })
-			.attr("y", function () { return yScale(d.y) + shiftY(d, i); })
-			.text(() => getSign(d, i));
 	}
 }
 
@@ -153,9 +158,9 @@ function drawPointLineSigns(g, pli, xScale, yScale) {
 
 function getPointLineSign(point, i) {
 	switch (i) {
-		case 0 : return `${point.y}`;
-		case 1 : return '';
-		case 2 : return `${point.x}`;
+		case 0: return `${point.y}`;
+		case 1: return '';
+		case 2: return `${point.x}`;
 	}
 }
 
@@ -163,9 +168,9 @@ function getSign(point, i) {
 	const { dates } = store;
 	switch (i) {
 		case store.pointsCount:
-			return (`X = ${point.x}`);
+			return (`X = ${Math.round(point.x * 100) / 100}`);
 		default:
-			return (`Z${i + 1}(${dates[i]})`);
+			return (`Z${i + 1} ${dates[i]}`);
 	}
 }
 
