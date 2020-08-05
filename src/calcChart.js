@@ -3,10 +3,10 @@ function calcData() {
 	cross.y = data[0].y * (100 + limitPercent) / 100;
 	cross.x = calcCrossX(cross.y);
 	data.push(cross);
-	let littleMore = calcLittleMore();
-	data.push(littleMore);
+	let tail = calcTail();
+	data.push(tail);
 	recalcAngles();
-	calcLimitLines(littleMore);
+	calcLimitLines(tail);
 	calcPointLines();
 }
 
@@ -21,13 +21,15 @@ function calcCrossX(y) {
 	const dx = dy / tgLast;
 	let x = (data[iLast].x + dx) / store.constant;
 	// use constant, but no more than last z-point
-	if (x < data[iLast].x) { x = data[iLast].x * 1.01; }
-	return (Math.round(x * 1000) / 1000);
+	if (x < data[iLast].x) {
+		x = data[iLast].x + (data[iLast].x / 100 / store.constant);
+	}
+	return x;
 }
 
-function calcLittleMore() {
+function calcTail() {
 	const { data, cross } = store;
-	const dy = (cross.y - data[0].y) * .1; // little more cross.y
+	const dy = (cross.y - data[0].y) * .1; // little more than cross.y
 	const tgLast = getTg(data[store.pointsCount - 1], cross);
 	if (tgLast > 0) {
 		const dx = dy / tgLast;
@@ -36,17 +38,17 @@ function calcLittleMore() {
 	return { x: cross.x, y: cross.y + dy };
 }
 
-function calcLimitLines(littleMore) {
+function calcLimitLines(tail) {
 	const { data, cross } = store;
 	// to draw chart not from start of line
-	const margintLeft10percent = (littleMore.x - data[0].x) * 0.1;
-	const margintBottom10percent = (littleMore.y - data[0].y) * 0.1;
+	const margintLeft10percent = (tail.x - data[0].x) * 0.1;
+	const margintBottom10percent = (tail.y - data[0].y) * 0.1;
 	store.limit = [
 		{ x: data[0].x - margintLeft10percent, y: cross.y },
-		{ x: littleMore.x, y: cross.y }];
+		{ x: tail.x, y: cross.y }];
 	store.vline = [
 		{ x: cross.x, y: data[0].y - margintBottom10percent },
-		{ x: cross.x, y: littleMore.y }];
+		{ x: cross.x, y: tail.y }];
 }
 
 function calcPointLines() {
@@ -84,7 +86,7 @@ function consoleLogDataAngles(rem) {
 	console.log('data = ', store.data);
 }
 
-// all points (posible with Cross and LittleMore)
+// all points (posible with Cross and Tail)
 function recalcAngles() {
 	const { data } = store;
 	for (let i = 0; i < data.length - 1; i++) {
