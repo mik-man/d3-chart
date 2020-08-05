@@ -4,6 +4,8 @@
   "description": "sk-chart-description-here",
   "main": "src/index.html",
   "scripts": {
+    "local:php": "docker-compose -f environment/php/local/docker/local.docker-compose.yml up --build",
+    "local:php:stop": "docker-compose -f environment/php/local/docker/local.docker-compose.yml down",
     "test": "test-command-here"
   },
   "repository": {
