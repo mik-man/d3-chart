@@ -18,22 +18,18 @@ table {
 .divParent {
   display        : flex;
   flex-flow      : row wrap;
-  justify-content: flex-start;
+  justify-content: space-around;
 }
 
 #divParent2 {
   flex-wrap: nowrap;
+  justify-content: space-around;
 }
 
-@media all and (max-width: 900px) {
+@media all and (max-width: 1170px) {
   #divParent2 {
     flex-wrap: wrap;
   }
-}
-
-/* childs */
-div>div {
-  /* width: min-content; */
 }
 
 #tableTop td:nth-child(2) {
