@@ -32,16 +32,16 @@ table {
   }
 }
 
-#tableTop td:nth-child(2) {
+#description-table td:nth-child(2) {
   text-align: right;
 }
 
-#tableData {
+#data-table {
   table-layout: fixed;
   width       : fit-content;
 }
 
-#tableData td:nth-child(n+2) {
+#data-table td:nth-child(n+2) {
   text-align: right;
 }
 
