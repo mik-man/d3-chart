@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>Тестируем PHP</title>
+  <title>SK-Chart-page</title>
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
