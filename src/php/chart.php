@@ -6,8 +6,8 @@ function renderChart($descriptionTable, $values) {
   echo '<script src="bindData.js"></script>';
 
   $rootEl = 'chart';
-  echo '<svg id="' . $rootEl . '" width="700" height="400"></svg>';
-
+  echo '<svg id="' . $rootEl . '" width="100%" height="100%" preserveAspectRatio="none"></svg>';
+  //  
   $pointsCount = count($values);
   $points = '[';
   for ($i = 0; $i < $pointsCount; $i++) {
@@ -23,7 +23,7 @@ function renderChart($descriptionTable, $values) {
   }
 
   echo '<script>';
-  echo 'renderChart(';
+  echo 'bootstrapChart(';
   echo '\'' . $rootEl . '\', ' . $points . ', ' . $dates . ', ';
   echo strval($descriptionTable[7]) . ', 1.2,);';
   echo '</script>'; 
