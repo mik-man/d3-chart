@@ -24,6 +24,7 @@ function callRenderChart() {
 }
 
 function renderChart(rootEl, points, dates, limit, angleMultiplier) {
+	console.log(rootEl);
 	store.data = points;
 	store.dates = dates;
 	store.limitPercent = limit;

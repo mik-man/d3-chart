@@ -3,11 +3,10 @@ function renderDataTable($values) {
   $header = array("Дата замера", "Длина отрезка, мм", "Удлинение, %", "Добыча, тыс. т", "Ответственный");
 
   echo '<table id="data-table">';
-  echo '<col style="width: 13rem">';
+  echo '<col style="width: 8rem">';
   $pointsCount = count($values);
-  for ($i = 0; $i < 4; $i++) {
-    $width = $i < $pointsCount ? 5 : 0;
-    echo '<col style="width: ' . $width . 'rem">';
+  for ($i = 0; $i < $pointsCount; $i++) {
+    echo '<col style="width: 5rem">';
   }
 
   echo '<thead>';
