@@ -14,7 +14,7 @@ var store = {
 
 // example
 function callRenderChart() {
-	renderChart(
+	bootstrapChart(
 		'chart',
 		[{ x: 95, y: 736 }, { x: 300, y: 738 }, { x: 550, y: 743 }],
 		['2020.07.01', '2020.07.02', '2020.07.03'],
@@ -23,8 +23,7 @@ function callRenderChart() {
 	);
 }
 
-function renderChart(rootEl, points, dates, limit, angleMultiplier) {
-	console.log(rootEl);
+function bootstrapChart(rootEl, points, dates, limit, angleMultiplier) {
 	store.data = points;
 	store.dates = dates;
 	store.limitPercent = limit;
@@ -32,7 +31,8 @@ function renderChart(rootEl, points, dates, limit, angleMultiplier) {
 	store.pointsCount = points.length;
 	checkData();
 	calcData();
-	drawChart(`#${rootEl}`);
+	window.addEventListener('load', () => { drawChart(`#${rootEl}`); } );
+	window.addEventListener('resize', () => { drawChart(`#${rootEl}`); } );
 }
 
 function initChart() {
@@ -49,12 +49,17 @@ function refreshChart() {
 function drawChart(svgId) {
 	let { data, limit, vline, pointLines } = store;
 	d3.select(svgId).selectAll("*").remove();
-	var svg = d3.select(svgId),
-		margin = { top: 20, right: 20, bottom: 30, left: 50 },
-		width = +svg.attr("width") - margin.left - margin.right,
-		height = +svg.attr("height") - margin.top - margin.bottom,
+
+	const svg = d3.select(svgId);
+	console.log('svg properties: ', svg.node().width.animVal.value);
+	const svg_width = svg.node().width.animVal.value;
+	const svg_height = svg.node().height.animVal.value;
+	const margin = { top: 20, right: 20, bottom: 30, left: 50 },
+		width = +svg_width - margin.left - margin.right,
+		height = +svg_height - margin.top - margin.bottom, // attr("height")
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+	console.log('start draw', width, height);
 	let xScale = d3.scaleLinear().rangeRound([0, width - 50]);
 	let yScale = d3.scaleLinear().rangeRound([height, 0]);
 	xScale.domain([limit[0].x, limit[1].x]);

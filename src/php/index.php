@@ -19,7 +19,7 @@
 </head>
 
 <body>
-  <div class="divParent">
+  <div class="row">
     <div id="divTableTop">
       <? renderDescriptionTable($descriptionTable); ?>
     </div>
@@ -28,10 +28,11 @@
     </div>
   </div>
   <br />
-  <div class="divParent" id="divParent2">
-    <div id="divChart">
+  <div class="row">
+    <div id="chart-section">
       <h3>Прогноз износа цепи</h3>
-      <? renderChart($descriptionTable, $dataTable); ?>
+      <div id="chart-container">
+      <? renderChart($descriptionTable, $dataTable); ?></div>
     </div>
     <? include "legend.php" ?>
   </div>
