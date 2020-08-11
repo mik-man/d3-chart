@@ -72,18 +72,7 @@ function avgAngle() {
 	for (let i = 0; i < anglesCount; i++) {
 		anglesTotal += calcAngle(data[i], data[i + 1]);
 	}
-	console.log('anglesTotal = ', anglesTotal, 'anglesCount = ', anglesCount);
 	return (anglesTotal / anglesCount);
-}
-
-function consoleLogDataAngles(rem) {
-	if (rem) console.log(rem);
-	store.angles.forEach((a, i) => {
-		console.log(`angle[${i}-${i + 1}] = ${a}`);
-	});
-	console.log('cross = ', store.cross);
-	console.log(`angle[0-X] = ${store.crossAngle}`);
-	console.log('data = ', store.data);
 }
 
 // all points (posible with Cross and Tail)
@@ -93,7 +82,6 @@ function recalcAngles() {
 		store.angles[i] = calcAngle(data[i], data[i + 1]);
 	}
 	store.crossAngle = calcAngle(data[0], store.cross);
-	consoleLogDataAngles();
 }
 
 function calcAngle(p0, p1) {
