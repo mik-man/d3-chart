@@ -31,7 +31,9 @@ function bootstrapChart(rootEl, points, dates, limit, angleMultiplier) {
 	store.pointsCount = points.length;
 	checkData();
 	calcData();
-	window.addEventListener('load', () => { drawChart(`#${rootEl}`); } );
+	window.addEventListener('load', () => {
+    setTimeout(() => drawChart(`#${rootEl}`), 0); // workaround for android chrome - this browser calls the load event before content rendering complete
+  } );
 	window.addEventListener('resize', () => { drawChart(`#${rootEl}`); } );
 }
 
@@ -51,15 +53,13 @@ function drawChart(svgId) {
 	d3.select(svgId).selectAll("*").remove();
 
 	const svg = d3.select(svgId);
-	console.log('svg properties: ', svg.node().width.animVal.value);
-	const svg_width = svg.node().width.animVal.value;
-	const svg_height = svg.node().height.animVal.value;
+	const svgWidth = svg.node().width.animVal.value;
+  const svgHeight = svg.node().height.animVal.value;
 	const margin = { top: 20, right: 20, bottom: 30, left: 50 },
-		width = +svg_width - margin.left - margin.right,
-		height = +svg_height - margin.top - margin.bottom, // attr("height")
+		width = +svgWidth - margin.left - margin.right,
+		height = +svgHeight - margin.top - margin.bottom, // attr("height")
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	console.log('start draw', width, height);
 	let xScale = d3.scaleLinear().rangeRound([0, width - 50]);
 	let yScale = d3.scaleLinear().rangeRound([height, 0]);
 	xScale.domain([limit[0].x, limit[1].x]);
@@ -80,12 +80,10 @@ function drawChart(svgId) {
 		.y(function (d) { return yScale(d.y) })
 		.curve(d3.curveMonotoneX);
 
-	// it works! :)
 	g.append("text").attr("x", 160).attr("y", 20)
 		.text(`limit = ${store.limit[0].y} (${store.limitPercent}%)`)
 		.attr("font-size", ".8rem");
 
-	console.log(store);
 	// limit
 	g.append("path")
 		.datum(limit)
