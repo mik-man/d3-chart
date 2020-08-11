@@ -14,16 +14,16 @@
 <html>
 
 <head>
-  <title>SK-Chart-page</title>
+  <title>Chart page</title>
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
   <div class="row">
-    <div id="divTableTop">
+    <div>
       <? renderDescriptionTable($descriptionTable); ?>
     </div>
-    <div id="divTableData">
+    <div>
       <? renderDataTable($dataTable); ?>
     </div>
   </div>
@@ -32,7 +32,8 @@
     <div id="chart-section">
       <h3>Прогноз износа цепи</h3>
       <div id="chart-container">
-      <? renderChart($descriptionTable, $dataTable); ?></div>
+        <? renderChart($descriptionTable, $dataTable); ?>
+      </div>
     </div>
     <? include "legend.php" ?>
   </div>
