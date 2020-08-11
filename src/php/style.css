@@ -17,25 +17,46 @@ h3 {
 .row {
   display        : flex;
   flex-flow      : row wrap;
+  align-content    : center;
   justify-content: space-around;
+}
+.row.custom-wrap {
+  flex-wrap: nowrap;
 }
 
 #chart-explanation {
   display       : flex;
   flex-direction: column;
   max-width     : 30em;
+  justify-content: center;
+}
+#chart-explanation p {
+  text-align: justify;
+  margin    : 1em;
+}
+
+#chart-container {
+  min-width : 200px;
+  min-height: 400px;
+  display: flex;
 }
 
 @media all and (max-width: 1170px) {
   #chart-explanation {
     max-width: none;
   }
+  .row.custom-wrap {
+    flex-wrap: wrap;
+  }
+  #chart-container {
+    min-height: 500px;
+  }
 }
 
 #chart-section {
   display       : flex;
   flex-direction: column;
-  flex-grow     : 1;
+  flex-grow: 1;
 }
 
 #description-table td:nth-child(2) {
@@ -47,16 +68,14 @@ h3 {
   width       : fit-content;
 }
 
+.title-column {
+  width: 8rem;
+}
+.point-column {
+  width: 5rem;
+}
+
 #data-table td:nth-child(n+2) {
   text-align: right;
 }
 
-#chart-explanation p {
-  text-align: justify;
-  margin    : 1em;
-}
-
-#chart-container {
-  min-width : 300px;
-  min-height: 300px;
-}
