@@ -1,1 +1,3 @@
 node_modules
+src/php/tmp
+environment/php/local/logs

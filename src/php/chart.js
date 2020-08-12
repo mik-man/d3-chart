@@ -14,7 +14,7 @@ var store = {
 
 // example
 function callRenderChart() {
-	renderChart(
+	bootstrapChart(
 		'chart',
 		[{ x: 95, y: 736 }, { x: 300, y: 738 }, { x: 550, y: 743 }],
 		['2020.07.01', '2020.07.02', '2020.07.03'],
@@ -23,7 +23,7 @@ function callRenderChart() {
 	);
 }
 
-function renderChart(rootEl, points, dates, limit, angleMultiplier) {
+function bootstrapChart(rootEl, points, dates, limit, angleMultiplier) {
 	store.data = points;
 	store.dates = dates;
 	store.limitPercent = limit;
@@ -31,27 +31,20 @@ function renderChart(rootEl, points, dates, limit, angleMultiplier) {
 	store.pointsCount = points.length;
 	checkData();
 	calcData();
-	drawChart(`#${rootEl}`);
-}
-
-function initChart() {
-	setTableData();
-}
-
-function refreshChart() {
-	getTableData();
-	if (!checkData()) { setTableData(); }
-	calcData();
-	drawChart("#chart");
+	window.addEventListener('load', () => { drawChart(`#${rootEl}`); } );
+	window.addEventListener('resize', () => { drawChart(`#${rootEl}`); } );
 }
 
 function drawChart(svgId) {
-	let { data, limit, vline, pointLines } = store;
-	d3.select(svgId).selectAll("*").remove();
-	var svg = d3.select(svgId),
-		margin = { top: 20, right: 20, bottom: 30, left: 50 },
-		width = +svg.attr("width") - margin.left - margin.right,
-		height = +svg.attr("height") - margin.top - margin.bottom,
+	let { data, limit, vline } = store;
+
+	const svg = d3.select(svgId);
+	svg.selectAll("*").remove();
+	const svg_width = svg.node().width.animVal.value;
+	const svg_height = svg.node().height.animVal.value;
+	const margin = { top: 20, right: 20, bottom: 30, left: 50 },
+		width = +svg_width - margin.left - margin.right,
+		height = +svg_height - margin.top - margin.bottom,
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 	let xScale = d3.scaleLinear().rangeRound([0, width - 50]);
@@ -74,12 +67,11 @@ function drawChart(svgId) {
 		.y(function (d) { return yScale(d.y) })
 		.curve(d3.curveMonotoneX);
 
-	// it works! :)
-	g.append("text").attr("x", 160).attr("y", 20)
+	// limit line sign
+	g.append("text").attr("x", 160).attr("y", 16)
 		.text(`limit = ${store.limit[0].y} (${store.limitPercent}%)`)
-		.attr("font-size", ".8rem");
+		.attr("font-size", ".8em");
 
-	console.log(store);
 	// limit
 	g.append("path")
 		.datum(limit)
@@ -88,7 +80,7 @@ function drawChart(svgId) {
 		.attr("stroke-width", .6)
 		.attr("d", line);
 
-	// vline
+	// vertical line
 	g.append("path")
 		.datum(vline)
 		.attr("fill", "none")
@@ -103,11 +95,12 @@ function drawChart(svgId) {
 		.style("stroke-dasharray", ("3, 3"))
 		.attr("d", curveLine);
 
-	data.length = store.pointsCount + 1;
+	// without tail point
+	const points = data.slice(0, store.pointsCount + 1);
 
 	// points
 	g.selectAll()
-		.data(data)
+		.data(points)
 		.enter()
 		.append("circle")
 		.attr("stroke", "none")
@@ -117,13 +110,13 @@ function drawChart(svgId) {
 
 	// points sings
 	g.selectAll()
-		.data(data)
+		.data(points)
 		.enter()
 		.append("text")
 		.attr("x", function (d, i) { return xScale(d.x) + shiftX(i) })
 		.attr("y", function (d, i) { return yScale(d.y) + shiftY(d, i) })
 		.text(getSign) // points hints
-		.attr("font-size", ".8rem");
+		.attr("font-size", ".8em");
 
 	// points coordinates lines
 	for (let pli = 0; pli < store.pointsCount; pli++) {
@@ -149,7 +142,7 @@ function drawPointLineSigns(g, pli, xScale, yScale) {
 		.enter()
 		.append("text")
 		.attr("fill", "blue")
-		.attr("font-size", ".8rem")
+		.attr("font-size", ".8em")
 		.attr("x", function (d, i) { return xScale(d.x) + 5 })
 		.attr("y", function (d, i) { return yScale(d.y) - 5 })
 		.text(getPointLineSign); // points hints
@@ -181,4 +174,35 @@ function shiftX(i) {
 function shiftY(p, i) {
 	if (i === store.pointsCount) return 18;
 	return 6;
+}
+
+function checkData() {
+	const { data, pointsCount } = store;
+	let check = true;
+	let limitPercent = store.limitPercent;
+	if (limitPercent < 3 || limitPercent > 100) {
+		alert(`Limit should be from 3% to 100%`);
+		limitPercent = 3;
+		store.limitPercent = limitPercent;
+		check = false;
+	}
+	const limit = data[0].y * (100 + limitPercent) / 100;
+	for (let i = 1; i < pointsCount; i++) {
+		if (data[i].x <= data[i - 1].x) {
+			alert(`z${i + 1}.x should be more than z${i}.x!`);
+			data[i].x = data[i - 1].x + 1;
+			check = false;
+		}
+		if (data[i].y <= data[i - 1].y) {
+			alert(`z${i + 1}.y should be more than z${i}.y!`);
+			data[i].y = data[i - 1].y + 1;
+			check = false;
+		}
+		if (data[i].y >= limit) {
+			alert(`z${i + 1}.y should be less than z1.y + ${limitPercent}% (${limit})`);
+			data[i].y = Math.round(limit * 0.99 * 10) / 10;
+			check = false;
+		}
+	}
+	return check;
 }

@@ -1,0 +1,62 @@
+body {
+  font-family: Arial;
+}
+
+table {
+  font-size   : .8em;
+  table-layout: fixed;
+  width       : fit-content;
+  margin      : .5em;
+}
+
+h3 {
+  text-align: center;
+  margin    : .5em;
+}
+
+.row {
+  display        : flex;
+  flex-flow      : row wrap;
+  justify-content: space-around;
+}
+
+#chart-explanation {
+  display       : flex;
+  flex-direction: column;
+  max-width     : 30em;
+}
+
+@media all and (max-width: 1170px) {
+  #chart-explanation {
+    max-width: none;
+  }
+}
+
+#chart-section {
+  display       : flex;
+  flex-direction: column;
+  flex-grow     : 1;
+}
+
+#description-table td:nth-child(2) {
+  text-align: right;
+}
+
+#data-table {
+  table-layout: fixed;
+  width       : fit-content;
+}
+
+#data-table td:nth-child(n+2) {
+  text-align: right;
+}
+
+#chart-explanation p {
+  text-align: justify;
+  margin    : 1em;
+}
+
+#chart-container {
+  min-width : 300px;
+  min-height: 300px;
+}
