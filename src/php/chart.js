@@ -31,7 +31,9 @@ function bootstrapChart(rootEl, points, dates, limit, angleMultiplier) {
 	store.pointsCount = points.length;
 	checkData();
 	calcData();
-	window.addEventListener('load', () => { drawChart(`#${rootEl}`); } );
+	window.addEventListener('load', () => {
+    setTimeout(() => drawChart(`#${rootEl}`), 0); // workaround for android chrome - this browser calls the load event before content rendering complete
+  } );
 	window.addEventListener('resize', () => { drawChart(`#${rootEl}`); } );
 }
 
@@ -40,11 +42,11 @@ function drawChart(svgId) {
 
 	const svg = d3.select(svgId);
 	svg.selectAll("*").remove();
-	const svg_width = svg.node().width.animVal.value;
-	const svg_height = svg.node().height.animVal.value;
+	const svgWidth = svg.node().width.animVal.value;
+	const svgHeight = svg.node().height.animVal.value;
 	const margin = { top: 20, right: 20, bottom: 30, left: 50 },
-		width = +svg_width - margin.left - margin.right,
-		height = +svg_height - margin.top - margin.bottom,
+		width = +svgWidth - margin.left - margin.right,
+		height = +svgHeight - margin.top - margin.bottom,
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 	let xScale = d3.scaleLinear().rangeRound([0, width - 50]);

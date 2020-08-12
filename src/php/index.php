@@ -27,15 +27,14 @@
       <? renderDataTable($dataTable); ?>
     </div>
   </div>
-  <br />
-  <div class="row">
+  <div class="row custom-wrap">
     <div id="chart-section">
       <h3>Прогноз износа цепи</h3>
       <div id="chart-container">
         <? renderChart($descriptionTable, $dataTable); ?>
       </div>
     </div>
-    <? include "legend.php" ?>
+    <? include "chartExplanation.php" ?>
   </div>
 </body>
 

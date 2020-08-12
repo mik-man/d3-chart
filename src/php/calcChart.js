@@ -5,7 +5,6 @@ function calcData() {
 	data.push(cross);
 	let tail = calcTail();
 	data.push(tail);
-	// recalcAngles(); // if you want to see all angles
 	calcLimitLines(tail);
 	calcPointLines();
 }
@@ -67,28 +66,4 @@ function getTg(p0, p1) {
 	const dx = p1.x - p0.x;
 	if (dx === 0) { return 0; } // error, actually
 	return ((p1.y - p0.y) / dx);
-}
-
-// all points (posible with Cross and Tail)
-function recalcAngles() {
-	const { data } = store;
-	for (let i = 0; i < data.length - 1; i++) {
-		store.angles[i] = calcAngle(data[i], data[i + 1]);
-	}
-	store.crossAngle = calcAngle(data[0], store.cross);
-	consoleLogDataAngles();
-}
-
-function calcAngle(p0, p1) {
-	return (Math.atan(getTg(p0, p1)) / Math.PI * 180);
-}
-
-function consoleLogDataAngles(rem) {
-	if (rem) console.log(rem);
-	store.angles.forEach((a, i) => {
-		console.log(`angle[${i}-${i + 1}] = ${a}`);
-	});
-	console.log('cross = ', store.cross);
-	console.log(`angle[0-X] = ${store.crossAngle}`);
-	console.log('data = ', store.data);
 }
